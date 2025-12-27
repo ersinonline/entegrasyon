@@ -1,0 +1,33 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Ürün görselleri
+    match /product-images/{merchantId}/{imageId} {
+      allow read: if true; // Herkes görebilir
+      allow write: if isAuthenticated();
+    }
+
+    // Faturalar
+    match /invoices/{merchantId}/{invoiceId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Kargo etiketleri
+    match /shipping-labels/{merchantId}/{labelId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Diğer dosyalar
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

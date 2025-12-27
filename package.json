@@ -1,0 +1,30 @@
+{
+  "name": "marketplace-integration",
+  "version": "1.0.0",
+  "description": "5 Pazaryeri Entegrasyon Sistemi - n11, Trendyol, Hepsiburada, Pazarama, İdefix",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:functions\" \"npm run dev:web\"",
+    "dev:functions": "cd functions && npm run build:watch",
+    "dev:web": "cd web && npm run dev",
+    "build": "npm run build:functions && npm run build:web",
+    "build:functions": "cd functions && npm run build",
+    "build:web": "cd web && npm run build",
+    "deploy": "firebase deploy",
+    "deploy:functions": "firebase deploy --only functions",
+    "deploy:hosting": "firebase deploy --only hosting",
+    "test": "cd functions && npm test"
+  },
+  "keywords": [
+    "marketplace",
+    "integration",
+    "n11",
+    "trendyol",
+    "hepsiburada",
+    "pazarama",
+    "idefix",
+    "firebase"
+  ],
+  "author": "",
+  "license": "MIT"
+}

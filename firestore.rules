@@ -1,0 +1,68 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Kullanıcı authenticated mi kontrol
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Kullanıcı admin mi kontrol
+    function isAdmin() {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Kullanıcının kendi merchant'ı mı kontrol
+    function isOwnMerchant(merchantId) {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/merchants/$(merchantId)).data.userId == request.auth.uid;
+    }
+
+    // Users koleksiyonu
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // Merchants koleksiyonu
+    match /merchants/{merchantId} {
+      allow read: if isAuthenticated() && (isOwnMerchant(merchantId) || isAdmin());
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (isOwnMerchant(merchantId) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // Stores koleksiyonu
+    match /stores/{storeId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Products koleksiyonu
+    match /products/{productId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Orders koleksiyonu
+    match /orders/{orderId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Integration logs - sadece okuma
+    match /integrationLogs/{logId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Sadece backend yazabilir
+    }
+
+    // Diğer tüm koleksiyonlar - varsayılan olarak kapalı
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
